@@ -120,7 +120,34 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                 st.write("系統正在調度 AI 模型，針對 7 大核心模組進行解構，請稍候...")
                 
                 # 初始化 Gemini 模組
-                model = genai.GenerativeModel('gemini-1.5-flash-latest')
+                          # --- 自動偵測可用模型 (解決 404 找不到模型的問題) ---
+                valid_models = []
+                for m in genai.list_models():
+                    if 'generateContent' in m.supported_generation_methods:
+                        valid_models.append(m.name)
+                
+                # 優先挑選 flash 高速模型，若無則降級選 pro 或其他可用模型
+                chosen_model = None
+                for m_name in valid_models:
+                    if "flash" in m_name:
+                        chosen_model = m_name
+                        break
+                
+                if not chosen_model:
+                    for m_name in valid_models:
+                        if "pro" in m_name:
+                            chosen_model = m_name
+                            break
+                            
+                if not chosen_model and valid_models:
+                    chosen_model = valid_models[0]
+
+                # 讓網頁顯示最終抓到哪一個模型
+                st.info(f"🔍 系統自動偵測並對接 API 模型：{chosen_model}")
+                
+                # 正式載入偵測到的模型
+                model = genai.GenerativeModel(chosen_model)
+                # ----------------------------------------------------
 
                 
                 # 建立 7 個頁籤 (Tabs) 讓介面更乾淨整齊
