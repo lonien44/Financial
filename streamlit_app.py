@@ -153,7 +153,7 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                         with st.spinner(f"AI 正在撰寫第 {i+1} 模組報告..."):
                             response = model.generate_content(prompts[i])
                             st.markdown(response.text)
-                            time.sleep(18) # 稍微緩衝避免 API 頻率限制
+                            time.sleep(1) # 稍微緩衝避免 API 頻率限制
                             
                 st.balloons() # 分析完成發送慶祝氣球
                 
