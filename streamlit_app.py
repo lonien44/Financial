@@ -120,7 +120,7 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                 st.write("系統正在調度 AI 模型，針對 7 大核心模組進行解構，請稍候...")
                 
                 # 初始化 Gemini 模組
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
                 
                 # 建立 7 個頁籤 (Tabs) 讓介面更乾淨整齊
