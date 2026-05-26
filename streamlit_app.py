@@ -107,12 +107,31 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                     net_income_summary = "數據格式不標準"
                     fcf_summary = "數據格式不標準"
 
+                                # 4. 整理要交給 AI 的數據文本 (新增技術面與基本面數據)
+                try:
+                    revenue_summary = financials.loc['Total Revenue'].to_dict() if 'Total Revenue' in financials.index else "無營收數據"
+                    net_income_summary = financials.loc['Net Income'].to_dict() if 'Net Income' in financials.index else "無淨利數據"
+                    fcf_summary = cashflow.loc['Free Cash Flow'].to_dict() if 'Free Cash Flow' in cashflow.index else "無自由現金流數據"
+                except Exception:
+                    revenue_summary = "數據格式不標準"
+                    net_income_summary = "數據格式不標準"
+                    fcf_summary = "數據格式不標準"
+
+                # 提取技術面指標
+                ma_50 = info.get('fiftyDayAverage', 'N/A')
+                ma_200 = info.get('twoHundredDayAverage', 'N/A')
+                high_52w = info.get('fiftyTwoWeekHigh', 'N/A')
+                low_52w = info.get('fiftyTwoWeekLow', 'N/A')
+                pb_ratio = info.get('priceToBook', 'N/A')
+                roe = info.get('returnOnEquity', 'N/A')
+
                 raw_data_context = f"""
                 公司名稱: {company_name} ({ticker})
-                當前市場數據: P/E={info.get('trailingPE')}, Forward P/E={info.get('forwardPE')}, 市值={info.get('marketCap')}
-                過去幾年總營收數據流: {revenue_summary}
-                過去幾年淨利數據流: {net_income_summary}
-                過去幾年自由現金流數據流: {fcf_summary}
+                當前市場數據: 當前價格={current_price}, P/E={info.get('trailingPE')}, P/B={pb_ratio}, ROE={roe}
+                技術面數據: 50日均線={ma_50}, 200日均線={ma_200}, 52週最高={high_52w}, 52週最低={low_52w}
+                過去幾年總營收: {revenue_summary}
+                過去幾年淨利: {net_income_summary}
+                過去幾年自由現金流: {fcf_summary}
                 """
                 
                 st.markdown("---")
