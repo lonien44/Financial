@@ -13,13 +13,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 側邊欄設定 (API Key 與系統說明) ---
+# --- 側邊欄設定 (API Key) ---
 with st.sidebar:
     st.title("⚙️ 系統核心設定")
     st.markdown("請輸入您的 Google Gemini API Key 以啟用 AI 分析大腦。")
     
-    # 讓用戶輸入 API Key (密碼隱碼形式)
-    api_key = st.text_input("Gemini API Key:", type="password", help="請前往 Google AI Studio 獲取免費或付費的 API Key")
+    api_key = st.text_input("Gemini API Key:", type="password", help="請前往 Google AI Studio 獲取")
     
     if api_key:
         genai.configure(api_key=api_key)
@@ -28,15 +27,17 @@ with st.sidebar:
         st.warning("🔑 請輸入 API Key 以解鎖 AI 分析功能。")
         
     st.markdown("---")
-    st.markdown("### 📊 系統核心模組")
+    st.markdown("### 📊 9 大核心模組")
     st.info(
         "1. 綜合全視角分析\n"
-        "2. 5年財務數據拆解\n"
-        "3. 競爭護城河評估\n"
-        "4. 投行級估值模型\n"
-        "5. 5-10年成長潛力\n"
-        "6. 分析師多空辯論\n"
-        "7. 最終投資決策建議"
+        "2. 技術面分析 (CMT)\n"
+        "3. 基本面分析 (價值投資)\n"
+        "4. 5年財務數據拆解\n"
+        "5. 競爭護城河評估\n"
+        "6. 投行級估值模型\n"
+        "7. 5-10年成長潛力\n"
+        "8. 分析師多空辯論\n"
+        "9. 最終投資決策建議"
     )
     st.caption("Powered by Streamlit, yfinance & Google Gemini")
 
@@ -48,7 +49,7 @@ st.markdown("---")
 # --- 用戶輸入區 ---
 col_input1, col_input2 = st.columns([2, 1])
 with col_input1:
-    ticker = st.text_input("🔍 請輸入股票代號 (美股如: NVDA, AAPL, MSFT / 台股如: 2330.TW, 2454.TW):", "NVDA").upper().strip()
+    ticker = st.text_input("🔍 請輸入股票代號 (美股如: NVDA, AAPL / 台股如: 2330.TW):", "NVDA").upper().strip()
 
 # --- 核心執行邏輯 ---
 if st.button("🚀 開始執行全方位深度分析", type="primary"):
@@ -64,11 +65,9 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                 current_price = info.get('currentPrice', info.get('previousClose', 'N/A'))
                 currency = info.get('currency', 'USD')
                 
-                # 獲取財務報表
-                financials = stock.financials # 損益表
-                cashflow = stock.cashflow     # 現金流量表
-                balance_sheet = stock.balance_sheet # 資產負債表
-                hist_5y = stock.history(period="5y") # 5年股價歷史
+                financials = stock.financials 
+                cashflow = stock.cashflow     
+                hist_5y = stock.history(period="5y") 
                 
                 # 2. 顯示基本行情看板
                 st.success(f"✅ 成功獲取 {company_name} ({ticker}) 的核心數據！")
@@ -96,18 +95,7 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 
-                # 4. 整理要交給 AI 的數據文本
-                # 萃取過去幾年的主要營收與淨利作為 AI 分析的參考依據
-                try:
-                    revenue_summary = financials.loc['Total Revenue'].to_dict() if 'Total Revenue' in financials.index else "無營收數據"
-                    net_income_summary = financials.loc['Net Income'].to_dict() if 'Net Income' in financials.index else "無淨利數據"
-                    fcf_summary = cashflow.loc['Free Cash Flow'].to_dict() if 'Free Cash Flow' in cashflow.index else "無自由現金流數據"
-                except Exception:
-                    revenue_summary = "數據格式不標準，請由 AI 自行根據市場現狀評估"
-                    net_income_summary = "數據格式不標準"
-                    fcf_summary = "數據格式不標準"
-
-                                # 4. 整理要交給 AI 的數據文本 (新增技術面與基本面數據)
+                # 4. 整理交給 AI 的綜合數據包 (包含技術面與基本面)
                 try:
                     revenue_summary = financials.loc['Total Revenue'].to_dict() if 'Total Revenue' in financials.index else "無營收數據"
                     net_income_summary = financials.loc['Net Income'].to_dict() if 'Net Income' in financials.index else "無淨利數據"
@@ -117,7 +105,6 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                     net_income_summary = "數據格式不標準"
                     fcf_summary = "數據格式不標準"
 
-                # 提取技術面指標
                 ma_50 = info.get('fiftyDayAverage', 'N/A')
                 ma_200 = info.get('twoHundredDayAverage', 'N/A')
                 high_52w = info.get('fiftyTwoWeekHigh', 'N/A')
@@ -136,44 +123,35 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                 
                 st.markdown("---")
                 st.markdown("### 🤖 華爾街 AI 分析師群報告產出")
-                st.write("系統正在調度 AI 模型，針對 7 大核心模組進行解構，請稍候...")
                 
-                # 初始化 Gemini 模組
-                          # --- 自動偵測可用模型 (解決 404 找不到模型的問題) ---
+                # --- 自動偵測可用模型 (解決 404 找不到模型的問題) ---
                 valid_models = []
                 for m in genai.list_models():
                     if 'generateContent' in m.supported_generation_methods:
                         valid_models.append(m.name)
                 
-                # 優先挑選 flash 高速模型，若無則降級選 pro 或其他可用模型
                 chosen_model = None
                 for m_name in valid_models:
                     if "flash" in m_name:
                         chosen_model = m_name
                         break
-                
                 if not chosen_model:
                     for m_name in valid_models:
                         if "pro" in m_name:
                             chosen_model = m_name
                             break
-                            
                 if not chosen_model and valid_models:
                     chosen_model = valid_models[0]
 
-                # 讓網頁顯示最終抓到哪一個模型
                 st.info(f"🔍 系統自動偵測並對接 API 模型：{chosen_model}")
-                
-                # 正式載入偵測到的模型
                 model = genai.GenerativeModel(chosen_model)
                 # ----------------------------------------------------
-
                 
-                                # 建立 9 個頁籤 (Tabs)
+                # 建立 9 個頁籤 (Tabs)
                 tabs_list = st.tabs([
                     "📋 1. 綜合全視角分析", 
-                    "📈 2. 技術面分析",     # 新增
-                    "💎 3. 基本面分析",     # 新增
+                    "📈 2. 技術面分析", 
+                    "💎 3. 基本面分析", 
                     "📊 4. 5年財務拆解", 
                     "🛡️ 5. 競爭護城河", 
                     "🏦 6. 投行級估值", 
@@ -182,13 +160,13 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                     "🎯 9. 最終投資結論"
                 ])
                 
-                                # 定義 9 大強大指令
+                # 定義 9 大指令
                 prompts = [
                     f"以華爾街資深股票分析師的角度對 {ticker} 進行完整分析。內容包括：商業模式、產業趨勢、關鍵風險、未來 12–24 個月展望。參考數據：{raw_data_context}",
                     
                     f"以資深技術分析師（CMT）的角度，分析 {ticker} 的近期價格走勢。請根據以下數據：當前價格={current_price}，50日均線={ma_50}，200日均線={ma_200}，52週高點={high_52w}，52週低點={low_52w}。評估目前趨勢是多頭還是空頭？點出潛在支撐與壓力位，並給出短線技術面操作建議。",
                     
-                    f"以價值投資大師（如巴菲特、葛拉漢）的角度，對 {ticker} 進行深度的基本面分析。請評估其盈利能力（淨利率、ROE={roe}）、估值水準（P/E={info.get('trailingPE')}, P/B={pb_ratio}）、現金流健康度，並判斷這家公司是否具備長期的投資價值與安全邊際。參考數據：{raw_data_context}",
+                    f"以價值投資大師（如巴菲特）的角度，對 {ticker} 進行深度的基本面分析。請評估其盈利能力（淨利率、ROE={roe}）、估值水準（P/E={info.get('trailingPE')}, P/B={pb_ratio}）、現金流健康度，並判斷這家公司是否具備長期的投資價值與安全邊際。參考數據：{raw_data_context}",
                     
                     f"分析 {company_name} ({ticker}) 過去 5 年的財務數據。請詳細拆解：營收成長、淨利趨勢、自由現金流。判斷財務體質是正在變強還是走弱。參考數據：{raw_data_context}",
                     
@@ -203,25 +181,15 @@ if st.button("🚀 開始執行全方位深度分析", type="primary"):
                     f"評估投資人是否應該投資這檔股票（{ticker}）。包含：短期展望、長期展望、關鍵催化因素、主要風險。最終給出唯一結論：買入（Buy）、持有（Hold）或避免（Avoid）。"
                 ]
                 
-                # 依序呼叫 AI 寫入對應的分頁 (迴圈改為 9 次)
+                # 依序呼叫 AI 寫入對應的分頁
                 for i in range(9):
                     with tabs_list[i]:
                         with st.spinner(f"AI 正在撰寫第 {i+1} 模組報告..."):
                             response = model.generate_content(prompts[i])
                             st.markdown(response.text)
-                            time.sleep(12) # 保持 12 秒的冷卻時間避免超載
-                
-                tabs_list = [tab1, tab2, tab3, tab4, tab5, tab6, tab7]
-                
-                # 依序呼叫 AI 寫入對應的分頁
-                for i in range(7):
-                    with tabs_list[i]:
-                        with st.spinner(f"AI 正在撰寫第 {i+1} 模組報告..."):
-                            response = model.generate_content(prompts[i])
-                            st.markdown(response.text)
-                            time.sleep(1) # 稍微緩衝避免 API 頻率限制
+                            time.sleep(12) # 保持 12 秒的冷卻時間避免 API 超載
                             
-                st.balloons() # 分析完成發送慶祝氣球
+                st.balloons()
                 
             except Exception as e:
-                st.error(f"❌ 分析過程中發生錯誤。可能原因：輸入的股票代號有誤、該公司數據未公開、或 API Key 異常。錯誤訊息：{e}")
+                st.error(f"❌ 分析過程中發生錯誤。可能原因：輸入的股票代號有誤、該公司數據未公開。錯誤訊息：{e}")
